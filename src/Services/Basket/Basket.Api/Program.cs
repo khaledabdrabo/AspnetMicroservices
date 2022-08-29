@@ -2,6 +2,7 @@ using Basket.Api.GrpcService;
 using Basket.Api.Repositories;
 using Basket.Api.Repositories.Interfaces;
 using Discount.Grpc.Protos;
+using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,17 @@ builder.Services.AddStackExchangeRedisCache(opt =>
 {
     opt.Configuration = builder.Configuration.GetValue<string>("CacheSettings:ConnectionString");
 });
+
+builder.Services.AddMassTransit(config =>
+{
+    config.UsingRabbitMq((context, cofg) =>
+    {
+        cofg.Host(builder.Configuration["EventBusSettings:Hostddress"]);
+    });
+});
+
+//builder.Services.AddMassTransitHostedService();
+
 
 var app = builder.Build();
 
